@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="returns_defs" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn:collaboration id="returns_collab"><bpmn:participant id="returns_part" name="Маркетплейс" processRef="returns"/></bpmn:collaboration>
+<bpmn:process id="returns" isExecutable="false">
+<bpmn:laneSet id="returns_ls"><bpmn:lane id="returns_lane0" name="Покупатель"><bpmn:flowNodeRef>s</bpmn:flowNodeRef><bpmn:flowNodeRef>apply</bpmn:flowNodeRef><bpmn:flowNodeRef>rej1</bpmn:flowNodeRef><bpmn:flowNodeRef>bring</bpmn:flowNodeRef><bpmn:flowNodeRef>rejend</bpmn:flowNodeRef><bpmn:flowNodeRef>money</bpmn:flowNodeRef></bpmn:lane><bpmn:lane id="returns_lane1" name="Система маркетплейса"><bpmn:flowNodeRef>check</bpmn:flowNodeRef><bpmn:flowNodeRef>g1</bpmn:flowNodeRef><bpmn:flowNodeRef>qr</bpmn:flowNodeRef><bpmn:flowNodeRef>rej2</bpmn:flowNodeRef><bpmn:flowNodeRef>refund</bpmn:flowNodeRef></bpmn:lane><bpmn:lane id="returns_lane2" name="Сотрудник ПВЗ"><bpmn:flowNodeRef>scan</bpmn:flowNodeRef><bpmn:flowNodeRef>g2</bpmn:flowNodeRef><bpmn:flowNodeRef>accept</bpmn:flowNodeRef><bpmn:flowNodeRef>par</bpmn:flowNodeRef></bpmn:lane><bpmn:lane id="returns_lane3" name="Склад возвратов"><bpmn:flowNodeRef>wh</bpmn:flowNodeRef><bpmn:flowNodeRef>resell</bpmn:flowNodeRef><bpmn:flowNodeRef>whend</bpmn:flowNodeRef></bpmn:lane></bpmn:laneSet>
+<bpmn:startEvent id="s" name="Решил вернуть товар"><bpmn:outgoing>f_s_apply</bpmn:outgoing></bpmn:startEvent>
+<bpmn:userTask id="apply" name="Оформить заявку: причина, фото"><bpmn:incoming>f_s_apply</bpmn:incoming><bpmn:outgoing>f_apply_check</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="check" name="Проверить срок и категорию товара"><bpmn:incoming>f_apply_check</bpmn:incoming><bpmn:outgoing>f_check_g1</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="g1" name="Возврат возможен?"><bpmn:incoming>f_check_g1</bpmn:incoming><bpmn:outgoing>f_g1_rej1</bpmn:outgoing><bpmn:outgoing>f_g1_qr</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="rej1" name="Отказ с пояснением"><bpmn:incoming>f_g1_rej1</bpmn:incoming></bpmn:endEvent>
+<bpmn:serviceTask id="qr" name="Сформировать QR-код возврата"><bpmn:incoming>f_g1_qr</bpmn:incoming><bpmn:outgoing>f_qr_bring</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:manualTask id="bring" name="Принести товар в ПВЗ"><bpmn:incoming>f_qr_bring</bpmn:incoming><bpmn:outgoing>f_bring_scan</bpmn:outgoing></bpmn:manualTask>
+<bpmn:userTask id="scan" name="Сканировать QR, осмотреть товар"><bpmn:incoming>f_bring_scan</bpmn:incoming><bpmn:outgoing>f_scan_g2</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="g2" name="Товар соответствует?"><bpmn:incoming>f_scan_g2</bpmn:incoming><bpmn:outgoing>f_g2_rej2</bpmn:outgoing><bpmn:outgoing>f_g2_accept</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:serviceTask id="rej2" name="Зафиксировать отказ, уведомить"><bpmn:incoming>f_g2_rej2</bpmn:incoming><bpmn:outgoing>f_rej2_rejend</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:endEvent id="rejend" name="Возврат отклонён"><bpmn:incoming>f_rej2_rejend</bpmn:incoming></bpmn:endEvent>
+<bpmn:userTask id="accept" name="Принять товар, выдать квитанцию"><bpmn:incoming>f_g2_accept</bpmn:incoming><bpmn:outgoing>f_accept_par</bpmn:outgoing></bpmn:userTask>
+<bpmn:parallelGateway id="par" name=""><bpmn:incoming>f_accept_par</bpmn:incoming><bpmn:outgoing>f_par_refund</bpmn:outgoing><bpmn:outgoing>f_par_wh</bpmn:outgoing></bpmn:parallelGateway>
+<bpmn:serviceTask id="refund" name="Вернуть деньги на карту"><bpmn:incoming>f_par_refund</bpmn:incoming><bpmn:outgoing>f_refund_money</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:endEvent id="money" name="Деньги возвращены"><bpmn:incoming>f_refund_money</bpmn:incoming></bpmn:endEvent>
+<bpmn:userTask id="wh" name="Проверить товар"><bpmn:incoming>f_par_wh</bpmn:incoming><bpmn:outgoing>f_wh_resell</bpmn:outgoing></bpmn:userTask>
+<bpmn:userTask id="resell" name="Вернуть в продажу или продавцу"><bpmn:incoming>f_wh_resell</bpmn:incoming><bpmn:outgoing>f_resell_whend</bpmn:outgoing></bpmn:userTask>
+<bpmn:endEvent id="whend" name="Товар обработан"><bpmn:incoming>f_resell_whend</bpmn:incoming></bpmn:endEvent>
+<bpmn:sequenceFlow id="f_s_apply" sourceRef="s" targetRef="apply"/>
+<bpmn:sequenceFlow id="f_apply_check" sourceRef="apply" targetRef="check"/>
+<bpmn:sequenceFlow id="f_check_g1" sourceRef="check" targetRef="g1"/>
+<bpmn:sequenceFlow id="f_g1_rej1" name="нет" sourceRef="g1" targetRef="rej1"/>
+<bpmn:sequenceFlow id="f_g1_qr" name="да" sourceRef="g1" targetRef="qr"/>
+<bpmn:sequenceFlow id="f_qr_bring" sourceRef="qr" targetRef="bring"/>
+<bpmn:sequenceFlow id="f_bring_scan" sourceRef="bring" targetRef="scan"/>
+<bpmn:sequenceFlow id="f_scan_g2" sourceRef="scan" targetRef="g2"/>
+<bpmn:sequenceFlow id="f_g2_rej2" name="нет" sourceRef="g2" targetRef="rej2"/>
+<bpmn:sequenceFlow id="f_rej2_rejend" sourceRef="rej2" targetRef="rejend"/>
+<bpmn:sequenceFlow id="f_g2_accept" name="да" sourceRef="g2" targetRef="accept"/>
+<bpmn:sequenceFlow id="f_accept_par" sourceRef="accept" targetRef="par"/>
+<bpmn:sequenceFlow id="f_par_refund" sourceRef="par" targetRef="refund"/>
+<bpmn:sequenceFlow id="f_refund_money" sourceRef="refund" targetRef="money"/>
+<bpmn:sequenceFlow id="f_par_wh" sourceRef="par" targetRef="wh"/>
+<bpmn:sequenceFlow id="f_wh_resell" sourceRef="wh" targetRef="resell"/>
+<bpmn:sequenceFlow id="f_resell_whend" sourceRef="resell" targetRef="whend"/>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="returns_diagram"><bpmndi:BPMNPlane id="returns_plane" bpmnElement="returns_collab">
+<bpmndi:BPMNShape id="returns_part_di" bpmnElement="returns_part" isHorizontal="true"><dc:Bounds x="0" y="0" width="2030" height="560"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="returns_lane0_di" bpmnElement="returns_lane0" isHorizontal="true"><dc:Bounds x="30" y="0" width="2000" height="140"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="returns_lane1_di" bpmnElement="returns_lane1" isHorizontal="true"><dc:Bounds x="30" y="140" width="2000" height="140"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="returns_lane2_di" bpmnElement="returns_lane2" isHorizontal="true"><dc:Bounds x="30" y="280" width="2000" height="140"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="returns_lane3_di" bpmnElement="returns_lane3" isHorizontal="true"><dc:Bounds x="30" y="420" width="2000" height="140"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="s_di" bpmnElement="s"><dc:Bounds x="117" y="52" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="87" y="92" width="96" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="apply_di" bpmnElement="apply"><dc:Bounds x="229" y="34" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="check_di" bpmnElement="check"><dc:Bounds x="379" y="174" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="g1_di" bpmnElement="g1" isMarkerVisible="true"><dc:Bounds x="560" y="185" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="450" y="155" width="100" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rej1_di" bpmnElement="rej1"><dc:Bounds x="717" y="52" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="687" y="92" width="96" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="qr_di" bpmnElement="qr"><dc:Bounds x="679" y="174" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bring_di" bpmnElement="bring"><dc:Bounds x="829" y="34" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="scan_di" bpmnElement="scan"><dc:Bounds x="979" y="314" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="g2_di" bpmnElement="g2" isMarkerVisible="true"><dc:Bounds x="1160" y="325" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1050" y="295" width="100" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rej2_di" bpmnElement="rej2"><dc:Bounds x="1279" y="174" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rejend_di" bpmnElement="rejend"><dc:Bounds x="1467" y="52" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1437" y="92" width="96" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="accept_di" bpmnElement="accept"><dc:Bounds x="1279" y="314" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="par_di" bpmnElement="par"><dc:Bounds x="1460" y="325" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1350" y="295" width="100" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="refund_di" bpmnElement="refund"><dc:Bounds x="1579" y="174" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="money_di" bpmnElement="money"><dc:Bounds x="1767" y="52" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1737" y="92" width="96" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="wh_di" bpmnElement="wh"><dc:Bounds x="1579" y="454" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="resell_di" bpmnElement="resell"><dc:Bounds x="1729" y="454" width="112" height="72"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="whend_di" bpmnElement="whend"><dc:Bounds x="1917" y="472" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1887" y="512" width="96" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="f_s_apply_di" bpmnElement="f_s_apply"><di:waypoint x="153" y="70"/><di:waypoint x="229" y="70"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_apply_check_di" bpmnElement="f_apply_check"><di:waypoint x="341" y="70"/><di:waypoint x="360" y="70"/><di:waypoint x="360" y="210"/><di:waypoint x="379" y="210"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_check_g1_di" bpmnElement="f_check_g1"><di:waypoint x="491" y="210"/><di:waypoint x="560" y="210"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_g1_rej1_di" bpmnElement="f_g1_rej1"><di:waypoint x="585" y="185"/><di:waypoint x="585" y="70"/><di:waypoint x="717" y="70"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_g1_qr_di" bpmnElement="f_g1_qr"><di:waypoint x="610" y="210"/><di:waypoint x="679" y="210"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_qr_bring_di" bpmnElement="f_qr_bring"><di:waypoint x="791" y="210"/><di:waypoint x="810" y="210"/><di:waypoint x="810" y="70"/><di:waypoint x="829" y="70"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_bring_scan_di" bpmnElement="f_bring_scan"><di:waypoint x="941" y="70"/><di:waypoint x="960" y="70"/><di:waypoint x="960" y="350"/><di:waypoint x="979" y="350"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_scan_g2_di" bpmnElement="f_scan_g2"><di:waypoint x="1091" y="350"/><di:waypoint x="1160" y="350"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_g2_rej2_di" bpmnElement="f_g2_rej2"><di:waypoint x="1185" y="325"/><di:waypoint x="1185" y="210"/><di:waypoint x="1279" y="210"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_rej2_rejend_di" bpmnElement="f_rej2_rejend"><di:waypoint x="1391" y="210"/><di:waypoint x="1429" y="210"/><di:waypoint x="1429" y="70"/><di:waypoint x="1467" y="70"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_g2_accept_di" bpmnElement="f_g2_accept"><di:waypoint x="1210" y="350"/><di:waypoint x="1279" y="350"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_accept_par_di" bpmnElement="f_accept_par"><di:waypoint x="1391" y="350"/><di:waypoint x="1460" y="350"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_par_refund_di" bpmnElement="f_par_refund"><di:waypoint x="1485" y="325"/><di:waypoint x="1485" y="210"/><di:waypoint x="1579" y="210"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_refund_money_di" bpmnElement="f_refund_money"><di:waypoint x="1691" y="210"/><di:waypoint x="1729" y="210"/><di:waypoint x="1729" y="70"/><di:waypoint x="1767" y="70"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_par_wh_di" bpmnElement="f_par_wh"><di:waypoint x="1485" y="375"/><di:waypoint x="1485" y="490"/><di:waypoint x="1579" y="490"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_wh_resell_di" bpmnElement="f_wh_resell"><di:waypoint x="1691" y="490"/><di:waypoint x="1729" y="490"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="f_resell_whend_di" bpmnElement="f_resell_whend"><di:waypoint x="1841" y="490"/><di:waypoint x="1917" y="490"/></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>
